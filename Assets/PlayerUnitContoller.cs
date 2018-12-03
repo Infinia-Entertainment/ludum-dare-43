@@ -24,6 +24,24 @@ public class PlayerUnitContoller : MonoBehaviour
 
     [SerializeField] private Transform clickTransform;
     [SerializeField] private Transform clickTransformSaved;
+
+
+    private float BoxWidth, BoxHeight, BoxLeft, BoxTop;
+    private Vector2 BoxStart, BoxFinish;
+
+    private void OnGUI()
+    {
+        if (Input.GetMouseButton(0) || Input.GetMouseButtonDown(0))
+        {
+            BoxWidth = Camera.main.WorldToScreenPoint(startMousePos).x - Camera.main.WorldToScreenPoint(endMousePos).x;
+            BoxHeight = Camera.main.WorldToScreenPoint(startMousePos).y - Camera.main.WorldToScreenPoint(endMousePos).y;
+            BoxLeft = Input.mousePosition.x;
+            BoxTop = (Screen.height - Input.mousePosition.y) - BoxHeight;
+
+            GUI.Box(new Rect(BoxLeft, BoxTop, BoxWidth, BoxHeight), "");
+        }
+    }
+
     private void Start()
     {
         clickTransformSaved = clickTransform;
@@ -62,15 +80,13 @@ public class PlayerUnitContoller : MonoBehaviour
             {
                 foreach (Collider2D unitCollider in previouslyHighlightedUnits)
                 {
-                    BaseUnit unit = unitCollider.GetComponentInParent<BaseUnit>();
-                    unit.selectionSprite.enabled = false;
+                    unitCollider.GetComponentInParent<BaseUnit>().UnselectUnit();
                 }
             }
 
             foreach (Collider2D unitCollider in selectedUnits) // enable highlight for selectedUnits
             {
-                BaseUnit unit = unitCollider.GetComponentInParent<BaseUnit>();
-                unit.selectionSprite.enabled = true;
+                unitCollider.GetComponentInParent<BaseUnit>().SelectUnit();
             }
 
 

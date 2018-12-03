@@ -14,6 +14,8 @@ public class BaseUnit : Damageable
     [SerializeField] public float attackDelay;
     [SerializeField] public LayerMask enemyMask;
 
+    private Animator animator;
+
     public int damage;
 
     public Transform gateTarget;
@@ -53,6 +55,7 @@ public class BaseUnit : Damageable
 
     public virtual void Start()
     {
+        animator = GetComponent<Animator>();
         gateTarget = FindObjectOfType < Gate>().transform;
         destinationSetter = GetComponent<AIDestinationSetter>();
         _AIPath = GetComponent<AIPath>();
@@ -277,5 +280,15 @@ public class BaseUnit : Damageable
     {
         PlayerUnitContoller.RemoveUnitFromLists(selectionSprite.GetComponent<Collider2D>());
         Destroy(gameObject);
+    }
+
+    public void UnselectUnit()
+    {
+        animator.SetBool("isSelected", false);
+    }
+
+    public void SelectUnit()
+    {
+        animator.SetBool("isSelected",true);
     }
 }
