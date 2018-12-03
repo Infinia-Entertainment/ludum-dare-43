@@ -12,13 +12,11 @@ public class MenuController : MonoBehaviour {
     [SerializeField] private GameObject achievementPanel;
 
     [SerializeField] private AudioListener audioListener;
-    [SerializeField] private PlayerController playerController;
 
     bool isMenuOpened = false;
 
     private void Start()
     {
-        playerController = FindObjectOfType<PlayerController>();
     }
 
     private void Update()
