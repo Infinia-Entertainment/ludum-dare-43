@@ -16425,7 +16425,7 @@ MonoBehaviour:
   selectionTexture: {fileID: 10904, guid: 0000000000000000f000000000000000, type: 0}
   selectionMask:
     serializedVersion: 2
-    m_Bits: 49152
+    m_Bits: 16384
   clickTransform: {fileID: 1293501475}
   clickTransformSaved: {fileID: 0}
 --- !u!4 &1842610433
