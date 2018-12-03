@@ -6,16 +6,17 @@ using UnityEngine;
 using Pathfinding;
 using System;
 
-public abstract class BaseUnit : Damageable
+public class BaseUnit : Damageable
 {
     [SerializeField] public float moveSpeed;
     [SerializeField] public float attackRange, sightRange;
-    private float sqrAttackRange;
+    private float AttackRange;
     [SerializeField] public float attackDelay;
     [SerializeField] public LayerMask enemyMask;
 
     public int damage;
 
+    public Transform gateTarget;
     public Transform target;
     public bool overrideTarget = false;
     public bool isDamagingEnemy;
@@ -52,10 +53,13 @@ public abstract class BaseUnit : Damageable
 
     public virtual void Start()
     {
+        gateTarget = FindObjectOfType < Gate>().transform;
         destinationSetter = GetComponent<AIDestinationSetter>();
         _AIPath = GetComponent<AIPath>();
         unitState = UnitState.Idle;
-        sqrAttackRange = Mathf.Sqrt(attackRange);
+        AttackRange = Mathf.Sqrt(attackRange);
+
+        _AIPath.maxSpeed = moveSpeed;
 
         OnDeath += UnitDeath;
     }
@@ -66,58 +70,120 @@ public abstract class BaseUnit : Damageable
         switch (unitState)
         {
             case UnitState.Idle:
-                if (!overrideTarget)
+                switch (unitControl)
                 {
-                    target = CheckForEnemies();
+                    case UnitControl.Player:
+                        if (!overrideTarget)
+                        {
+                            target = CheckForEnemies();
 
-                    if (target != null)
-                    {
-                        Attack(target);
-                    }
+                            if (target != null) Attack(target);
 
+                        }
+                        break;
+
+                    case UnitControl.AI:
+
+                        if (!overrideTarget)
+                        {
+                            Transform tempTarget = CheckForEnemies();
+                            target = (tempTarget == null) ? gateTarget : tempTarget;
+
+                            if (target != null) Attack(target);
+
+                        }
+
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case UnitState.Moving:
-                //nothing happends because player makes it move
-                if (_AIPath.reachedDestination )
+                switch (unitControl)
                 {
-                    unitState = UnitState.Idle;
+                    case UnitControl.Player:
+                        if (_AIPath.reachedDestination)
+                        {
+                            unitState = UnitState.Idle;
+                        }
+                        break;
+                    case UnitControl.AI:
+                        if (_AIPath.reachedDestination)
+                        {
+                            unitState = UnitState.Idle;
+                        }
+                        break;
+                    default:
+                        break;
                 }
-
                 break;
             case UnitState.Approaching:
-                if (target != null && target.GetComponent<BaseUnit>()?.unitControl != unitControl)
+                switch (unitControl)
                 {
-                    Attack(target);
+                    case UnitControl.Player:
+                        if (target != null && target.GetComponent<BaseUnit>()?.unitControl != unitControl)
+                        {
+                            Attack(target);
+                        }
+                        else if (target == null)
+                        {
+                            unitState = UnitState.Idle;
+                        }
+                        break;
+                    case UnitControl.AI:
+                        if (target != null && target.GetComponent<BaseUnit>()?.unitControl != unitControl)
+                        {
+                            Attack(target);
+                        }
+                        else if (target == null)
+                        {
+                            unitState = UnitState.Idle;
+                        }
+                        break;
+                    default:
+                        break;
                 }
-                if (target == null)
-                {
-                    unitState = UnitState.Idle;
-                }
+
 
                 break;
             case UnitState.Fighting:
-                if (target != null && target.GetComponent<BaseUnit>()?.unitControl != unitControl)
+                switch (unitControl)
                 {
-                    Attack(target);
+                    case UnitControl.Player:
+                        if (target != null && target.GetComponent<BaseUnit>()?.unitControl != unitControl)
+                        {
+                            Attack(target);
+                        }
+                        else if (target == null)
+                        {
+                            unitState = UnitState.Idle;
+                        }
+                        break;
+                    case UnitControl.AI:
+                        if (target != null && target.GetComponent<BaseUnit>()?.unitControl != unitControl)
+                        {
+                            Attack(target);
+                        }
+                        else if (target == null)
+                        {
+                            unitState = UnitState.Idle;
+                        }
+                        break;
+                    default:
+                        break;
                 }
-
-                if (target == null)
-                {
-                    unitState = UnitState.Idle;
-                }
-
                 break;
             default:
                 break;
         }
 
-        UpdateTarget();
 
         if (health<=0)
         {
             OnDeath.Invoke();
         }
+
+        UpdateTarget();
     }
 
     public virtual Transform CheckForEnemies()
@@ -137,6 +203,7 @@ public abstract class BaseUnit : Damageable
         if (enemies.Count > 0)
         {
             List<float> distancesList = new List<float>();
+            Debug.Log(enemies.Count);
             foreach (GameObject enemy in enemies)
             {
                 distancesList.Add(Vector3.Distance(transform.position, enemy.transform.position));
@@ -150,9 +217,10 @@ public abstract class BaseUnit : Damageable
 
     public virtual void Attack(Transform target)
     {
-        if (SqrWithinDistance(transform.position, target.position, sqrAttackRange))
+        Debug.Log(WithinDistance(transform.position, target.position, AttackRange));
+        if (WithinDistance(transform.position, target.position, AttackRange))
         {
-
+            Debug.Log("attacking");
             unitState = UnitState.Fighting;
 
             if (!isDamagingEnemy)
@@ -190,19 +258,24 @@ public abstract class BaseUnit : Damageable
     }
 
 
-    private bool SqrWithinDistance(Vector3 original, Vector3 target, float sqrAttackRange)
+    private bool WithinDistance(Vector2 original, Vector2 target, float AttackRange)
     {
-        return (original - target).sqrMagnitude <= sqrAttackRange;
+        return (original - target).magnitude <= AttackRange;
     }
 
     private void UpdateTarget()
     {
+        //if (unitControl == UnitControl.AI &&target ==null && gateTarget != null)
+        //{
+        //    target = gateTarget;
+        //}
         destinationSetter.target = target;
 
     }
 
     public virtual void UnitDeath()
     {
+        PlayerUnitContoller.RemoveUnitFromLists(selectionSprite.GetComponent<Collider2D>());
         Destroy(gameObject);
     }
 }

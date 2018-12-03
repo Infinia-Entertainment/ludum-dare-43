@@ -9,31 +9,30 @@ public class PlayerUnitContoller : MonoBehaviour
 
     //[SerializeField] private List<BaseUnit> selectedUnits = new List<BaseUnit>();
 
+    AstarPath astarPath;
     Vector2 startMousePos;
     Vector2 endMousePos;
     public Texture selectionTexture;
     [SerializeField] LayerMask selectionMask;
 
-    public Collider2D[] previousSelectedUnits;
-    public Collider2D[] selectedUnits;
+    [SerializeField] static public List<Collider2D> previousSelectedUnits = new List<Collider2D>();
+    [SerializeField] static public List<Collider2D> selectedUnits = new List<Collider2D>();
 
-    public Collider2D[] highlightedUnits;
-    public Collider2D[] previousCurrentSelectedUnits;
-    Collider2D[] previouslyHighlightedUnits;
+    [SerializeField] static public List<Collider2D> highlightedUnits = new List<Collider2D>();
+    [SerializeField] static public List<Collider2D> previousCurrentSelectedUnits = new List<Collider2D>();
+    [SerializeField] static List<Collider2D> previouslyHighlightedUnits = new List<Collider2D>();
 
     [SerializeField] private Transform clickTransform;
     [SerializeField] private Transform clickTransformSaved;
     private void Start()
     {
         clickTransformSaved = clickTransform;
-    }
-
-    private void OnGUI()
-    {
+        astarPath = FindObjectOfType<AstarPath>();
     }
 
     private void Update()
     {
+        AstarPath.active.Scan();
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -58,24 +57,24 @@ public class PlayerUnitContoller : MonoBehaviour
         {
             endMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            selectedUnits = Physics2D.OverlapAreaAll(startMousePos, endMousePos, selectionMask); // get current selectedUnits
+            selectedUnits = Physics2D.OverlapAreaAll(startMousePos, endMousePos, selectionMask).ToList(); // get current selectedUnits
             if (previouslyHighlightedUnits != null)
             {
-                for (int i = 0; i < previouslyHighlightedUnits.Length; i++)
+                foreach (Collider2D unitCollider in previouslyHighlightedUnits)
                 {
-                    BaseUnit unit = previouslyHighlightedUnits[i].GetComponentInParent<BaseUnit>();
+                    BaseUnit unit = unitCollider.GetComponentInParent<BaseUnit>();
                     unit.selectionSprite.enabled = false;
                 }
             }
-            
-            for (int i = 0; i < selectedUnits.Length; i++) // enable highlight for selectedUnits
+
+            foreach (Collider2D unitCollider in selectedUnits) // enable highlight for selectedUnits
             {
-                BaseUnit unit = selectedUnits[i].GetComponentInParent<BaseUnit>();
+                BaseUnit unit = unitCollider.GetComponentInParent<BaseUnit>();
                 unit.selectionSprite.enabled = true;
             }
 
 
-            previouslyHighlightedUnits = previousCurrentSelectedUnits.Except(selectedUnits).ToArray(); // get Unit from previousUnits, except selected Units
+            previouslyHighlightedUnits = previousCurrentSelectedUnits.Except(selectedUnits).ToList(); // get Unit from previousUnits, except selected Units
 
             previousCurrentSelectedUnits = selectedUnits; //assigning previous as current
 
@@ -101,21 +100,20 @@ public class PlayerUnitContoller : MonoBehaviour
             {
                 BaseUnit enemyUnit = mouseCollisionPoint.GetComponentInParent<BaseUnit>();
 
-                for (int i = 0; i < selectedUnits.Length; i++)
+                foreach (Collider2D unitCollider in selectedUnits)
                 {
-                    BaseUnit playerUnit = selectedUnits[i].GetComponentInParent<BaseUnit>();
+                    BaseUnit playerUnit = unitCollider.GetComponentInParent<BaseUnit>();
                     playerUnit.overrideTarget = true;
                     playerUnit.target = null;
                     playerUnit.target = enemyUnit.transform;
                     playerUnit.unitState = BaseUnit.UnitState.Approaching;
-                
                 }
             }
             else
             {
-                for (int i = 0; i < selectedUnits.Length; i++)
+                foreach (Collider2D unitCollider in selectedUnits)
                 {
-                    BaseUnit playerUnit = selectedUnits[i].GetComponentInParent<BaseUnit>();
+                    BaseUnit playerUnit = unitCollider.GetComponentInParent<BaseUnit>();
                     playerUnit.overrideTarget = true;
                     playerUnit.target = clickTransform;
                     playerUnit.unitState = BaseUnit.UnitState.Moving;
@@ -132,6 +130,24 @@ public class PlayerUnitContoller : MonoBehaviour
     {
         GUI.DrawTexture(new Rect(startMousePos.x,startMousePos.y,endMousePos.x,endMousePos.y), selectionTexture);
     }
+
+    public static void RemoveUnitFromLists(Collider2D UnitSelectionSprite)
+    {
+        previousSelectedUnits.Remove(UnitSelectionSprite);
+        selectedUnits.Remove(UnitSelectionSprite);
+        highlightedUnits.Remove(UnitSelectionSprite);
+        previousCurrentSelectedUnits.Remove(UnitSelectionSprite);
+        previouslyHighlightedUnits.Remove(UnitSelectionSprite);
+
+        Debug.Log(previousSelectedUnits.Count);
+        Debug.Log(selectedUnits.Count);
+        Debug.Log(highlightedUnits.Count);
+        Debug.Log(previousCurrentSelectedUnits.Count);
+        Debug.Log(previouslyHighlightedUnits.Count);
+
+    }
+
+
 
     void DebugDrawBox(Vector2 start, Vector2 end, Color color, float duration = 1f)
     {

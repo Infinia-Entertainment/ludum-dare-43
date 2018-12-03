@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Damageable : MonoBehaviour
+public class Damageable : MonoBehaviour
 {
     public int health;
 
