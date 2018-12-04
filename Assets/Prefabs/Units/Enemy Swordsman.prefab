@@ -197,9 +197,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: -0.5}
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.25
 --- !u!50 &8918902330594041186
 Rigidbody2D:
   serializedVersion: 4
@@ -253,8 +253,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e4f83478aa25f14186dc142901bb321, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 7
-  moveSpeed: 1.5
+  health: 8
+  moveSpeed: 3
   attackRange: 2.5
   sightRange: 7
   attackDelay: 1.5
@@ -301,7 +301,7 @@ MonoBehaviour:
   version: 2
   radius: 0.5
   height: 0.01
-  repathRate: 0.2
+  repathRate: 0
   canSearch: 1
   canMove: 1
   maxSpeed: 4
@@ -313,9 +313,9 @@ MonoBehaviour:
   orientation: 1
   enableRotation: 0
   targetCompatibility: {fileID: 0}
-  maxAcceleration: -2.5
+  maxAcceleration: 15
   rotationSpeed: 360
-  slowdownDistance: 0.8
+  slowdownDistance: 0.5
   pickNextWaypointDist: 2
   endReachedDistance: 2
   alwaysDrawGizmos: 0

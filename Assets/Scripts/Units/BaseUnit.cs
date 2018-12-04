@@ -189,6 +189,11 @@ public class BaseUnit : Damageable
         UpdateTarget();
     }
 
+    void LateUpdate()
+    {
+        GetComponent<SpriteRenderer>().sortingOrder = -(int)(transform.position.y * 100);
+    }
+
     public virtual Transform CheckForEnemies()
     {
         var colliders = Physics2D.OverlapCircleAll(transform.position, sightRange, enemyMask);

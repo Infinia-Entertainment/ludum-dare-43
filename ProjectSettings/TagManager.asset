@@ -47,6 +47,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Units
+    uniqueID: 981931643
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

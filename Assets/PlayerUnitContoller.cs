@@ -26,6 +26,11 @@ public class PlayerUnitContoller : MonoBehaviour
     [SerializeField] private Transform clickTransformSaved;
 
 
+    [SerializeField] private GameObject winPanel, losePanel,gate;
+    
+    [SerializeField] static List<BaseUnit> aliveEnemyUnits = new List<BaseUnit>();
+
+
     private float BoxWidth, BoxHeight, BoxLeft, BoxTop;
     private Vector2 BoxStart, BoxFinish;
 
@@ -42,6 +47,11 @@ public class PlayerUnitContoller : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        aliveEnemyUnits = FindObjectsOfType<BaseUnit>().ToList();
+    }
+
     private void Start()
     {
         clickTransformSaved = clickTransform;
@@ -50,6 +60,8 @@ public class PlayerUnitContoller : MonoBehaviour
 
     private void Update()
     {
+        CheckForWinLose();
+
         AstarPath.active.Scan();
 
         if (Input.GetMouseButtonDown(0))
@@ -140,6 +152,19 @@ public class PlayerUnitContoller : MonoBehaviour
         }
 
 
+    }
+
+    private void CheckForWinLose()
+    {
+        if (aliveEnemyUnits.Count <=0)
+        {
+            winPanel.SetActive(true);
+
+        }
+        if (gate == null)
+        {
+            losePanel.SetActive(true);
+        }
     }
 
     private void DrawSelectionBox(Vector2 startMousePos, Vector2 endMousePos, Texture selectionTexture)
